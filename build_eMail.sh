@@ -5,7 +5,7 @@ DOWNLOAD_URL="https://github.com/deanproxy/eMail.git"
 SRC_FILE="eMail.tar.gz"
 SRC_FILE_MD5="git"
 SRC_DIR_NAME="eMail"
-DIST_FILES='eMail.exe,cygwin1.dll'
+DIST_FILES='email.exe,cygwin1.dll'
 ([ -z "$PKG_NAME" ] || [ -z "$DOWNLOAD_URL" ] || [ -z "$SRC_FILE" ] || [ -z "$SRC_DIR_NAME" ] || [ -z "$SRC_FILE_MD5" ] || [ -z "$DIST_FILES" ]) && exit
 
 
@@ -79,12 +79,6 @@ done
 
 check_builded
 
-# -lcrypto
-# -L/usr/lib -I/usr/include
-# CFLAGS="-L/usr/lib -I/usr/include"
-# --disable-shared --enable-static
-# -L/usr/lib -I/usr/include -lpcre
-# -Wl,-static
-# -L/usr/lib -lpcre
-# /use/lib/libpcre.a
-# objdump -p hello.exe | grep "DLL Name"
+if check_builded; then
+	cp -vr $Work_Root/srcs/${PKG_NAME}_build/${SRC_DIR_NAME}/src/email.exe $Work_Root/dist/eMail
+fi

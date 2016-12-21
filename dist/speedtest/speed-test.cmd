@@ -1,0 +1,2 @@
+.\speed-test.exe
+pause

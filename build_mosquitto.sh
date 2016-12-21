@@ -47,4 +47,6 @@ cd $Work_Root/srcs/mosquitto_cygport
 
 cygport mosquitto-1.4.8-1bl1.cygport all
 
-check_builded
+if check_builded; then
+	cp -vr ${Work_Root}/srcs/mosquitto_cygport/mosquitto-1.4.8-1bl1.i686/inst/usr/sbin/mosquitto.exe $Work_Root/dist/mosquitto
+fi

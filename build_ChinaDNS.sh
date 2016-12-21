@@ -47,4 +47,6 @@ cd $Work_Root/srcs/ChinaDNS_cygport
 
 cygport ChinaDNS-1.3.2-1bl1.cygport all
 
-check_builded
+if check_builded; then
+	cp -vr ${Work_Root}/srcs/ChinaDNS_cygport/ChinaDNS-1.3.2-1bl1.i686/inst/usr/bin/chinadns.exe $Work_Root/dist/ChinaDNS
+fi

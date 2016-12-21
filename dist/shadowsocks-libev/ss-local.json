@@ -1,0 +1,9 @@
+{
+	"method": "chacha20",
+	"password": "password",
+	"server": "1.1.1.1",
+	"local_address": "0.0.0.0",
+	"server_port": 1883,
+	"timeout":60,
+	"local_port":1180
+}

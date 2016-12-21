@@ -70,14 +70,6 @@ done | sort -n | uniq | while read file;do
 	cp -vr ${file} $Work_Root/srcs/${PKG_NAME}_build/dist/
 done
 
-check_builded
-
-# -lcrypto
-# -L/usr/lib -I/usr/include
-# CFLAGS="-L/usr/lib -I/usr/include"
-# --disable-shared --enable-static
-# -L/usr/lib -I/usr/include -lpcre
-# -Wl,-static
-# -L/usr/lib -lpcre
-# /use/lib/libpcre.a
-# objdump -p hello.exe | grep "DLL Name"
+if check_builded; then
+	cp -vr $Work_Root/srcs/${PKG_NAME}_build/${SRC_DIR_NAME}/pingpong.exe $Work_Root/dist/pingpong
+fi
