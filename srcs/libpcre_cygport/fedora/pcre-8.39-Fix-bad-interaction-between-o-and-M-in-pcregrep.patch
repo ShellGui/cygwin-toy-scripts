@@ -1,0 +1,33 @@
+From 664df44c7eb62edbce95ab6dbdedcba7f07fed02 Mon Sep 17 00:00:00 2001
+From: ph10 <ph10@2f5784b3-3f2a-0410-8824-cb99058d5e15>
+Date: Fri, 17 Jun 2016 17:28:14 +0000
+Subject: [PATCH] Fix bad interaction between -o and -M in pcregrep.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+git-svn-id: svn://vcs.exim.org/pcre/code/trunk@1658 2f5784b3-3f2a-0410-8824-cb99058d5e15
+
+Petr Písař <ppisar@redhat.com>: Ported to 8.39.
+
+
+diff --git a/pcregrep.c b/pcregrep.c
+index cd53c64..fd2a676 100644
+--- a/pcregrep.c
++++ b/pcregrep.c
+@@ -1803,6 +1803,12 @@ while (ptr < endptr)
+         match = FALSE;
+         if (line_buffered) fflush(stdout);
+         rc = 0;                      /* Had some success */
++
++        /* If the current match ended past the end of the line (only possible
++        in multiline mode), we are done with this line. */
++
++        if ((unsigned int)offsets[1] > linelength) goto END_ONE_MATCH;
++
+         startoffset = offsets[1];    /* Restart after the match */
+         if (startoffset <= oldstartoffset)
+           {
+-- 
+2.5.5
+

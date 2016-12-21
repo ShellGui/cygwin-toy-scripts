@@ -1,0 +1,67 @@
+NAME="openssl"
+VERSION=1.0.2e
+RELEASE=1
+CATEGORY="Net"
+SUMMARY="A general purpose cryptography toolkit with TLS implementation"
+DESCRIPTION="The OpenSSL toolkit provides support for secure communications between
+machines. OpenSSL includes a certificate management tool and shared
+libraries which provide various cryptographic algorithms and protocols."
+HOMEPAGE="http://www.openssl.org/"
+SRC_URI="ftp://ftp.openssl.org/source/${P}.tar.gz"
+PATCH_URI="
+	http://pkgs.fedoraproject.org/cgit/openssl.git/plain/openssl-1.0.0-beta5-enginesdir.patch
+	1.0.2-debuginfo.patch
+"
+
+PKG_NAMES="openssl openssl-devel openssl-perl libopenssl100"
+openssl_CATEGORY="Base Net"
+openssl_CONTENTS="--exclude=CA.pl* --exclude=tsget usr/bin/openssl.exe
+		  usr/share/doc usr/share/man/man[157] usr/ssl/"
+openssl_devel_SUMMARY="${SUMMARY} (development)"
+openssl_devel_CONTENTS="usr/include usr/lib/*.a usr/lib/pkgconfig usr/share/man/man3/"
+openssl_perl_SUMMARY="Perl scripts provided with OpenSSL"
+openssl_perl_REQUIRES="openssl"
+openssl_perl_CONTENTS="usr/bin/c_rehash usr/ssl/misc/CA.pl usr/ssl/misc/tsget
+	usr/share/man/man1/CA.pl.1.gz"
+libopenssl100_CATEGORY="Base Libs"
+libopenssl100_SUMMARY="${SUMMARY} (runtime)"
+libopenssl100_REQUIRES="ca-certificates"
+libopenssl100_CONTENTS="usr/bin/cyg*-1.0.0.dll usr/lib/${P%[a-z]}/engines/"
+
+DIFF_EXCLUDES="Makefile.save"
+
+MAKEOPTS+=" -j1"
+
+src_compile() {
+	cd ${S}
+	lndirs
+	cd ${B}
+	unset CC
+	# MASS REBUILD (ABI break): remove no-krb5 and add:
+	#	--with-krb5-dir=/usr --with-krb5-flavor=MIT \
+	./Configure --prefix=/usr --enginesdir=/usr/lib/${P%[a-z]}/engines \
+		$(cross_compiling && echo -n --cross-compile-prefix=${ARCH}-pc-cygwin-) \
+		shared zlib enable-camellia enable-seed enable-tlsext \
+		enable-rfc3779 enable-cms enable-md2 no-idea no-rc5 no-krb5 \
+		Cygwin${ARCH_x86_64+-x86_64}
+	cygmake depend
+	cygmake OPT_CFLAGS="${CFLAGS}"
+}
+
+src_install() {
+	cd ${B}
+	cygmake install INSTALL_PREFIX=${D}
+
+	dodir /usr/lib/${P%[a-z]}
+	mv ${D}/usr/lib/engines ${D}/usr/lib/${P%[a-z]}/
+
+	dodir /usr/share
+	# move these so that we do not have to mess with MANPATH
+	mv ${D}/usr/ssl/man ${D}/usr/share/
+
+	dodir /usr/ssl/certs
+	cp -rp ${S}/certs/* ${D}/usr/ssl/certs/
+}
+
+DOCS="CHANGES.SSLeay INSTALL"
+KEEPDIRS="/usr/ssl/private"

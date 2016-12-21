@@ -1,0 +1,33 @@
+--- origsrc/openssl-1.0.2a/Configure	2015-03-19 16:08:33.952761607 +0100
++++ src/openssl-1.0.2a/Configure	2015-03-19 16:14:46.061816093 +0100
+@@ -588,8 +588,8 @@ my %table=(
+ "UWIN", "cc:-DTERMIOS -DL_ENDIAN -O -Wall:::UWIN::BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${no_asm}:win32",
+ 
+ # Cygwin
+-"Cygwin", "gcc:-DTERMIOS -DL_ENDIAN -fomit-frame-pointer -O3 -march=i486 -Wall:::CYGWIN::BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_asm}:coff:dlfcn:cygwin-shared:-D_WINDLL:-shared:.dll.a",
+-"Cygwin-x86_64", "gcc:-DTERMIOS -DL_ENDIAN -O3 -Wall:::CYGWIN::SIXTY_FOUR_BIT_LONG RC4_CHUNK DES_INT DES_UNROLL:${x86_64_asm}:mingw64:dlfcn:cygwin-shared:-D_WINDLL:-shared:.dll.a",
++"Cygwin", "gcc:\$(OPT_CFLAGS) -DTERMIOS -DL_ENDIAN -fomit-frame-pointer -O3 -march=i686 -Wall:::CYGWIN::BN_LLONG ${x86_gcc_des} ${x86_gcc_opts}:${x86_asm}:coff:dlfcn:cygwin-shared:-D_WINDLL:-shared:.dll.a",
++"Cygwin-x86_64", "gcc:\$(OPT_CFLAGS) -DTERMIOS -DL_ENDIAN -O3 -Wall:::CYGWIN::SIXTY_FOUR_BIT_LONG RC4_CHUNK DES_INT DES_UNROLL:${x86_64_asm}:mingw64:dlfcn:cygwin-shared:-D_WINDLL:-shared:.dll.a",
+ 
+ # NetWare from David Ward (dsward@novell.com)
+ # requires either MetroWerks NLM development tools, or gcc / nlmconv
+--- origsrc/openssl-1.0.2a/Makefile.shared	2015-03-19 16:14:57.245727560 +0100
++++ src/openssl-1.0.2a/Makefile.shared	2015-03-19 16:15:45.514345456 +0100
+@@ -272,7 +272,7 @@ link_o.cygwin:
+ 	SHLIB_SOVER=${LIBVERSION:+"-$(LIBVERSION)"}; \
+ 	ALLSYMSFLAGS='-Wl,--whole-archive'; \
+ 	NOALLSYMSFLAGS='-Wl,--no-whole-archive'; \
+-	SHAREDFLAGS="$(CFLAGS) $(SHARED_LDFLAGS) -shared $$base $$deffile -Wl,-s,-Bsymbolic"; \
++	SHAREDFLAGS="$(CFLAGS) $(SHARED_LDFLAGS) -shared $$base $$deffile -Wl,-Bsymbolic"; \
+ 	$(LINK_SO_O)
+ #for mingw target if def-file is in use dll-name should match library-name
+ link_a.cygwin:
+@@ -297,7 +297,7 @@ link_a.cygwin:
+ 	extras="$$extras rc.o"; \
+ 	ALLSYMSFLAGS='-Wl,--whole-archive'; \
+ 	NOALLSYMSFLAGS='-Wl,--no-whole-archive'; \
+-	SHAREDFLAGS="$(CFLAGS) $(SHARED_LDFLAGS) -shared $$base -Wl,-s,-Bsymbolic -Wl,--out-implib,lib$(LIBNAME).dll.a $$extras"; \
++	SHAREDFLAGS="$(CFLAGS) $(SHARED_LDFLAGS) -shared $$base -Wl,-Bsymbolic -Wl,--out-implib,lib$(LIBNAME).dll.a $$extras"; \
+ 	[ -f apps/$$dll_name ] && rm apps/$$dll_name; \
+ 	[ -f test/$$dll_name ] && rm test/$$dll_name; \
+ 	$(LINK_SO_A) || exit 1; \

@@ -1,0 +1,53 @@
+NAME="pcre"
+VERSION=8.39
+RELEASE=1
+CATEGORY="Libs"
+SUMMARY="Perl Compatible Regular Expressions"
+DESCRIPTION="The PCRE library is a set of functions that implement regular
+expression pattern matching using the same syntax and semantics as Perl,
+with just a few differences."
+HOMEPAGE="http://www.pcre.org/"
+SRC_URI="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-${VERSION}.tar.bz2 \
+	 ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-${VERSION}.tar.bz2.sig"
+PATCH_URI="
+	fedora/pcre-8.21-multilib.patch
+	fedora/pcre-8.39-Fix-bad-interaction-between-o-and-M-in-pcregrep.patch
+	8.39-cygwin-jit.patch
+"
+
+PKG_NAMES="${NAME} libpcre1 libpcre16_0 libpcre32_0 libpcrecpp0 libpcreposix0 libpcre-devel libpcre-doc"
+pcre_CATEGORY="Text"
+pcre_SUMMARY="${SUMMARY} utilities"
+pcre_CONTENTS="--exclude=html --exclude=pcre-config*
+               usr/bin/*.exe usr/share/doc/ usr/share/man/man1/"
+libpcre1_SUMMARY="${SUMMARY} UTF-8 runtime"
+libpcre1_CONTENTS="usr/bin/cygpcre-1.dll"
+libpcre16_0_SUMMARY="${SUMMARY} UTF-16 runtime"
+libpcre16_0_CONTENTS="usr/bin/cygpcre16-0.dll"
+libpcre32_0_SUMMARY="${SUMMARY} UTF-32 runtime"
+libpcre32_0_CONTENTS="usr/bin/cygpcre32-0.dll"
+libpcrecpp0_SUMMARY="${SUMMARY} C++ bindings"
+libpcrecpp0_CONTENTS="usr/bin/cygpcrecpp-0.dll"
+libpcreposix0_SUMMARY="POSIX regex API using PCRE"
+libpcreposix0_CONTENTS="usr/bin/cygpcreposix-0.dll"
+libpcre_devel_SUMMARY="${SUMMARY} library development"
+libpcre_devel_CONTENTS="usr/bin/pcre-config usr/include/
+                        usr/lib/ usr/share/doc/${NAME}/pcre-config.txt
+                        usr/share/man/man1/pcre-config.*"
+libpcre_doc_CATEGORY="Doc"
+libpcre_doc_SUMMARY="${SUMMARY} API documentation"
+libpcre_doc_CONTENTS="usr/share/doc/${NAME}/html/ usr/share/man/man3/"
+
+NO_AUTOHEADER=1
+CYGCONF_ARGS="
+		--enable-jit \
+		--enable-pcre16 \
+		--enable-pcre32 \
+		--enable-newline-is-anycrlf \
+		--enable-unicode-properties --enable-utf8 \
+		--enable-pcregrep-libbz2 \
+		--enable-pcregrep-libz \
+		--enable-pcretest-libreadline \
+		--disable-stack-for-recursion \
+		--enable-static
+"
