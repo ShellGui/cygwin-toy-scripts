@@ -8,6 +8,30 @@ Work_Root=$(pwd)
 
 . $Work_Root/http_proxy.conf
 
+cache=$(awk '
+BEGIN {
+RS = "\n\\<"
+FS = "\n\t"
+}
+$1 == "last-cache" {
+print $2
+}
+' /etc/setup/setup.rc)
+
+mirror=$(awk '
+/last-mirror/ {
+getline
+print $1
+}
+' /etc/setup/setup.rc)
+mirrordir=$(sed '
+s / %2f g
+s : %3a g
+' <<< "$mirror")
+
+mkdir -p "$cache/$mirrordir/$arch"
+cd "$cache/$mirrordir/$arch"
+rm -rf setup.bz2
 
 base_pkgs="
 binutils
@@ -71,6 +95,43 @@ util-linux
 wget
 which
 xz
+
+# gtk pkgs
+
+xinit
+
+
+
+libgtk3-devel
+libgtk3-doc
+libgailutil3_0
+libgailutil3-devel
+libgailutil3-doc
+girepository-Gtk3.0
+gtk3-demo
+gtk-update-icon-cache
+
+libiconv
+# libintl
+zlib
+libpng12
+# libjpeg
+tiff
+# XFree86-bin
+
+	
+# gobject
+# gmodule
+# glib
+# atk
+# pango
+# pangowin32
+# gdk-win32
+# gdk_pixbuf
+# gtk
+
+# libsigc+
+# gtkmm
 "
 # libusb-win32-devel-filter-1.2.6.0.exe
 
