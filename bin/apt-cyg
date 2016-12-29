@@ -133,6 +133,8 @@ function find-workspace {
   # default working directory and mirror
   
   # work wherever setup worked last, if possible
+  cache=$(cat ~/.cygwinxp.local.path)
+  if [ -z "$cache" ]; then
   cache=$(awk '
   BEGIN {
     RS = "\n\\<"
@@ -153,7 +155,8 @@ function find-workspace {
   s / %2f g
   s : %3a g
   ' <<< "$mirror")
-
+  fi
+	
   mkdir -p "$cache/$mirrordir/$arch"
   cd "$cache/$mirrordir/$arch"
   if [ -e setup.ini ]

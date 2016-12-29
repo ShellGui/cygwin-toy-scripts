@@ -6,8 +6,9 @@
 
 Work_Root=$(pwd)
 
-. $Work_Root/http_proxy.conf
-
+if uname -s | grep -q 'NT-5.1'; then
+	echo "$Work_Root/CygwinXP/cygwinxp.local" > ~/.cygwinxp.local.path
+else
 cache=$(awk '
 BEGIN {
 RS = "\n\\<"
@@ -32,6 +33,9 @@ s : %3a g
 mkdir -p "$cache/$mirrordir/$arch"
 cd "$cache/$mirrordir/$arch"
 rm -rf setup.bz2
+fi
+
+. $Work_Root/http_proxy.conf
 
 base_pkgs="
 binutils
@@ -144,11 +148,11 @@ EOF
 fi
 done
 
-if ! which apt-cyg &>/dev/null; then
+# if ! which apt-cyg &>/dev/null; then
 install ./bin/apt-cyg /usr/bin
-fi
-apt-cyg mirror http://ftp.jaist.ac.jp/pub/cygwin/
-apt-cyg update
+# fi
+# apt-cyg mirror http://ftp.jaist.ac.jp/pub/cygwin/
+# apt-cyg update
 apt-cyg install $(echo "$base_pkgs" | grep -v '#' | tr '\n' ' ') 
 
 # apt-cyg update

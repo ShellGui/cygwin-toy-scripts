@@ -40,7 +40,7 @@ fi
 if [ ! -f ${Work_Root}/srcs/libpcre_cygport/pcre-8.39-1.i686/inst/usr/lib/libpcre.a ]; then
 	cat <<EOF
 Please Build libpcre first:
-./build_libpcre-8.39.sh.sh
+./build_libpcre-8.39.sh
 EOF
 exit
 fi
@@ -61,7 +61,7 @@ tar zxvf $Work_Root/dl/$SRC_FILE -C $Work_Root/srcs/${PKG_NAME}_build
 
 cd $Work_Root/srcs/${PKG_NAME}_build/${SRC_DIR_NAME}
 
-LIBS="-ldl " LDFLAGS="-Wl,-static -static -static-libgcc " ./configure --disable-documentation --with-pcre=${Work_Root}/srcs/libpcre_cygport/pcre-8.39-1.i686/inst/usr --enable-static # --host=i686-pc-cygwin
+LIBS="-ldl " LDFLAGS="-Wl,-static -static -static-libgcc " ./configure --disable-documentation --with-pcre=${Work_Root}/srcs/libpcre_cygport/pcre-8.39-1.i686/inst/usr/  --enable-static # --host=i686-pc-cygwin
 make
 
 
