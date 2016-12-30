@@ -136,6 +136,10 @@ tiff
 
 # libsigc+
 # gtkmm
+
+mingw64-i686-gcc-core
+mingw64-i686-gcc-g++
+mingw64-i686-runtime
 "
 # libusb-win32-devel-filter-1.2.6.0.exe
 
