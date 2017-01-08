@@ -40,7 +40,7 @@ fi
 if [ ! -f ${Work_Root}/srcs/openssl_cygport/openssl-1.0.2e-1.i686/inst/usr/lib/libssl.a ]; then
 	cat <<EOF
 Please Build libpcre first:
-./build_libpcre-8.39.sh.sh
+./build_openssl.sh
 EOF
 exit
 fi

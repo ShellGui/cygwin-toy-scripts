@@ -1,0 +1,280 @@
+--- origsrc/mosquitto-1.4.10/CMakeLists.txt	2016-08-17 20:05:14.000000000 +0900
++++ src/mosquitto-1.4.10/CMakeLists.txt	2016-12-02 12:05:44.245613300 +0900
+@@ -42,7 +42,7 @@ else (WIN32)
+ 	else ("${CMAKE_INSTALL_PREFIX}" STREQUAL /usr)
+ 		set (SYSCONFDIR etc/mosquitto)
+ 	endif ("${CMAKE_INSTALL_PREFIX}" STREQUAL /usr)
+-	
++
+ 	set (LIBDIR lib${LIB_SUFFIX})
+ 	set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIBDIR}")
+ 	set (INCLUDEDIR include)
+@@ -93,3 +93,12 @@ add_subdirectory(man)
+ # ========================================
+ 
+ install(FILES mosquitto.conf aclfile.example pskfile.example pwfile.example DESTINATION "${SYSCONFDIR}")
++
++SET(prefix ${CMAKE_INSTALL_PREFIX})
++SET(exec_prefix ${CMAKE_INSTALL_PREFIX})
++SET(libdir ${CMAKE_INSTALL_PREFIX}/lib)
++SET(includedir ${CMAKE_INSTALL_PREFIX}/include)
++CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/mosquitto.pc.in ${CMAKE_BINARY_DIR}/mosquitto.pc @ONLY)
++INSTALL(FILES ${CMAKE_BINARY_DIR}/mosquitto.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
++CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/mosquittopp.pc.in ${CMAKE_BINARY_DIR}/mosquittopp.pc @ONLY)
++INSTALL(FILES ${CMAKE_BINARY_DIR}/mosquittopp.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+--- origsrc/mosquitto-1.4.10/lib/CMakeLists.txt	2016-08-17 20:05:14.000000000 +0900
++++ src/mosquitto-1.4.10/lib/CMakeLists.txt	2016-12-02 12:08:17.036196700 +0900
+@@ -70,7 +70,7 @@ set_target_properties(libmosquitto PROPE
+ 	SOVERSION 1
+ )
+ 
+-install(TARGETS libmosquitto RUNTIME DESTINATION "${BINDIR}" LIBRARY DESTINATION "${LIBDIR}")
++install(TARGETS libmosquitto RUNTIME DESTINATION "${BINDIR}" ARCHIVE DESTINATION "${LIBDIR}")
+ install(FILES mosquitto.h DESTINATION "${INCLUDEDIR}")
+ 
+ if (UNIX)
+--- origsrc/mosquitto-1.4.10/lib/cpp/CMakeLists.txt	2016-08-17 20:05:14.000000000 +0900
++++ src/mosquitto-1.4.10/lib/cpp/CMakeLists.txt	2016-12-02 12:08:24.915610400 +0900
+@@ -10,7 +10,7 @@ set_target_properties(mosquittopp PROPER
+ 	VERSION ${VERSION}
+ 	SOVERSION 1
+ )
+-install(TARGETS mosquittopp RUNTIME DESTINATION "${BINDIR}" LIBRARY DESTINATION "${LIBDIR}")
++install(TARGETS mosquittopp RUNTIME DESTINATION "${BINDIR}" ARCHIVE DESTINATION "${LIBDIR}")
+ install(FILES mosquittopp.h DESTINATION "${INCLUDEDIR}")
+ 
+ if (UNIX)
+--- origsrc/mosquitto-1.4.10/mosquitto.pc.in	1970-01-01 09:00:00.000000000 +0900
++++ src/mosquitto-1.4.10/mosquitto.pc.in	2016-12-02 12:04:21.467231600 +0900
+@@ -0,0 +1,10 @@
++prefix=@prefix@
++exec_prefix=@exec_prefix@
++libdir=@libdir@
++includedir=@includedir@
++
++Name: mosquitto
++Description: Open Source MQTT v3.1 Broker
++Version: @VERSION@
++Libs: -L${libdir} -lmosquitto
++Cflags: -I${includedir}
+--- origsrc/mosquitto-1.4.10/mosquittopp.pc.in	1970-01-01 09:00:00.000000000 +0900
++++ src/mosquitto-1.4.10/mosquittopp.pc.in	2016-12-02 12:06:35.457764700 +0900
+@@ -0,0 +1,10 @@
++prefix=@prefix@
++exec_prefix=@exec_prefix@
++libdir=@libdir@
++includedir=@includedir@
++
++Name: mosquittopp
++Description: Open Source MQTT v3.1 Broker (c++)
++Version: @VERSION@
++Libs: -L${libdir} -lmosquitto -lmosquittopp
++Cflags: -I${includedir}
+--- origsrc/mosquitto-1.4.10/config.mk	2016-08-17 05:56:28.000000000 +0800
++++ src/mosquitto-1.4.10/config.mk	2017-01-07 23:25:22.072188100 +0800
+@@ -76,6 +76,9 @@
+ # Build with client support for SOCK5 proxy.
+ WITH_SOCKS:=yes
+ 
++# Build static libraries
++WITH_STATIC_LIBRARIES:=yes
++
+ # =============================================================================
+ # End of user configuration
+ # =============================================================================
+--- origsrc/mosquitto-1.4.10/lib/Makefile	2016-08-17 05:56:28.000000000 +0800
++++ src/mosquitto-1.4.10/lib/Makefile	2017-01-07 23:27:01.837813100 +0800
+@@ -1,32 +1,25 @@
+ include ../config.mk
++include objects.mk
+ 
+ .PHONY : really clean install
+ 
+-MOSQ_OBJS=mosquitto.o \
+-		  logging_mosq.o \
+-		  memory_mosq.o \
+-		  messages_mosq.o \
+-		  net_mosq.o \
+-		  read_handle.o \
+-		  read_handle_client.o \
+-		  read_handle_shared.o \
+-		  send_mosq.o \
+-		  send_client_mosq.o \
+-		  socks_mosq.o \
+-		  srv_mosq.o \
+-		  thread_mosq.o \
+-		  time_mosq.o \
+-		  tls_mosq.o \
+-		  util_mosq.o \
+-		  will_mosq.o
++ALL_DEPS=libmosquitto.so.${SOVERSION}
+ 
+-all : libmosquitto.so.${SOVERSION} libmosquitto.a
++ifeq ($(WITH_STATIC_LIBRARIES),yes)
++	ALL_DEPS+=libmosquitto.a
++endif
++
++all : ${ALL_DEPS}
+ 	$(MAKE) -C cpp
+ 
+ install : all
+ 	$(INSTALL) -d ${DESTDIR}$(prefix)/lib${LIB_SUFFIX}/
+ 	$(INSTALL) -s --strip-program=${CROSS_COMPILE}${STRIP} libmosquitto.so.${SOVERSION} ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquitto.so.${SOVERSION}
+ 	ln -sf libmosquitto.so.${SOVERSION} ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquitto.so
++ifeq ($(WITH_STATIC_LIBRARIES),yes)
++	$(INSTALL) libmosquitto.a ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquitto.a
++	${CROSS_COMPILE}${STRIP} -g --strip-unneeded ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquitto.a
++endif
+ 	$(INSTALL) -d ${DESTDIR}${prefix}/include/
+ 	$(INSTALL) mosquitto.h ${DESTDIR}${prefix}/include/mosquitto.h
+ 	$(MAKE) -C cpp install
+@@ -34,6 +27,7 @@
+ uninstall :
+ 	-rm -f ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquitto.so.${SOVERSION}
+ 	-rm -f ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquitto.so
++	-rm -f ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquitto.a
+ 	-rm -f ${DESTDIR}${prefix}/include/mosquitto.h
+ 
+ reallyclean : clean
+@@ -42,10 +36,10 @@
+ 	-rm -f *.o libmosquitto.so.${SOVERSION} libmosquitto.so libmosquitto.a
+ 	$(MAKE) -C cpp clean
+ 
+-libmosquitto.so.${SOVERSION} : ${MOSQ_OBJS}
++libmosquitto.so.${SOVERSION} : ${MOSQ_C_OBJS}
+ 	${CROSS_COMPILE}$(CC) -shared $(LIB_LDFLAGS) $^ -o $@ ${LIB_LIBS}
+ 
+-libmosquitto.a : ${MOSQ_OBJS}
++libmosquitto.a : ${MOSQ_C_OBJS}
+ 	${CROSS_COMPILE}$(AR) cr $@ $^
+ mosquitto.o : mosquitto.c mosquitto.h
+ 	${CROSS_COMPILE}$(CC) $(LIB_CFLAGS) -c $< -o $@
+--- /dev/null	2017-01-07 23:32:56.000000000 +0800
++++ src/mosquitto-1.4.10/lib/objects.mk	2017-01-07 23:24:08.150313100 +0800
+@@ -0,0 +1,20 @@
++MOSQ_C_OBJ_NAMES=mosquitto.o \
++		  logging_mosq.o \
++		  memory_mosq.o \
++		  messages_mosq.o \
++		  net_mosq.o \
++		  read_handle.o \
++		  read_handle_client.o \
++		  read_handle_shared.o \
++		  send_mosq.o \
++		  send_client_mosq.o \
++		  socks_mosq.o \
++		  srv_mosq.o \
++		  thread_mosq.o \
++		  time_mosq.o \
++		  tls_mosq.o \
++		  util_mosq.o \
++		  will_mosq.o
++
++CURDIR=$(dir $(lastword $(MAKEFILE_LIST)))
++MOSQ_C_OBJS=$(addprefix $(CURDIR), $(MOSQ_C_OBJ_NAMES))
+--- origsrc/mosquitto-1.4.10/lib/cpp/Makefile	2017-01-07 23:29:35.259688100 +0800
++++ src/mosquitto-1.4.10/lib/cpp/Makefile	2017-01-07 23:29:39.322188100 +0800
+@@ -1,4 +1,5 @@
+ include ../../config.mk
++include ../objects.mk
+ 
+ ifneq ($(UNAME),SunOS)
+ 	LIB_LDFLAGS:=$(LDFLAGS) -Wl,-soname,libmosquittopp.so.${SOVERSION}
+@@ -6,26 +7,41 @@
+ 
+ .PHONY : clean install
+ 
+-all : libmosquittopp.so.${SOVERSION}
++ALL_DEPS=libmosquittopp.so.${SOVERSION}
++
++ifeq ($(WITH_STATIC_LIBRARIES),yes)
++    ALL_DEPS+=libmosquittopp.a
++endif
++
++all : ${ALL_DEPS}
+ 
+ install : all
+ 	$(INSTALL) -d ${DESTDIR}$(prefix)/lib${LIB_SUFFIX}/
+ 	$(INSTALL) -s --strip-program=${CROSS_COMPILE}${STRIP} libmosquittopp.so.${SOVERSION} ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquittopp.so.${SOVERSION}
+ 	ln -sf libmosquittopp.so.${SOVERSION} ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquittopp.so
++ifeq ($(WITH_STATIC_LIBRARIES),yes)
++	$(INSTALL) libmosquittopp.a ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquittopp.a
++	${CROSS_COMPILE}${STRIP} -g --strip-unneeded ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquittopp.a
++endif
+ 	$(INSTALL) -d ${DESTDIR}${prefix}/include/
+ 	$(INSTALL) mosquittopp.h ${DESTDIR}${prefix}/include/mosquittopp.h
+ 	
+ uninstall :
+ 	-rm -f ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquittopp.so.${SOVERSION}
+ 	-rm -f ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquittopp.so
++	-rm -f ${DESTDIR}${prefix}/lib${LIB_SUFFIX}/libmosquittopp.a
+ 	-rm -f ${DESTDIR}${prefix}/include/mosquittopp.h
+ 
+ clean :
+ 	-rm -f *.o libmosquittopp.so.${SOVERSION}
++	-rm -f *.o libmosquittopp.so.${SOVERSION} libmosquittopp.a
+ 
+ libmosquittopp.so.${SOVERSION} : mosquittopp.o
+ 	${CROSS_COMPILE}$(CXX) -shared $(LIB_LDFLAGS) $< -o $@ ../libmosquitto.so.${SOVERSION}
+ 
++libmosquittopp.a : mosquittopp.o ${MOSQ_C_OBJS}
++	${CROSS_COMPILE}$(AR) cr $@ $^
++
+ mosquittopp.o : mosquittopp.cpp mosquittopp.h
+ 	${CROSS_COMPILE}$(CXX) $(LIB_CXXFLAGS) -c $< -o $@
+ 
+--- origsrc/mosquitto-1.4.10/lib/CMakeLists.txt	2017-01-07 23:39:55.119063100 +0800
++++ origsrc/mosquitto-1.4.10/lib/CMakeLists.txt	2017-01-08 00:21:32.165938100 +0800
+@@ -16,9 +16,9 @@
+ endif (${WITH_THREADING} STREQUAL ON)
+ 
+ include_directories(${mosquitto_SOURCE_DIR} ${mosquitto_SOURCE_DIR}/lib
+-			${STDBOOL_H_PATH} ${STDINT_H_PATH}
++			${STDBOOL_H_PATH} ${STDINT_H_PATH} PPPWWWDDD/srcs/c-ares_cygport/c-ares-1.12.0-1bl1.i686/inst/usr/include
+ 			${OPENSSL_INCLUDE_DIR} ${PTHREAD_INCLUDE_DIR})
+-link_directories(${mosquitto_SOURCE_DIR}/lib)
++link_directories(${mosquitto_SOURCE_DIR}/lib PPPWWWDDD/srcs/c-ares_cygport/c-ares-1.12.0-1bl1.i686/inst/usr/lib)
+ 
+ add_library(libmosquitto SHARED
+ 	logging_mosq.c logging_mosq.h
+@@ -20,7 +20,7 @@
+ 			${OPENSSL_INCLUDE_DIR} ${PTHREAD_INCLUDE_DIR})
+ link_directories(${mosquitto_SOURCE_DIR}/lib PPPWWWDDD/srcs/c-ares_cygport/c-ares-1.12.0-1bl1.i686/inst/usr/lib)
+ 
+-add_library(libmosquitto SHARED
++add_library(libmosquitto STATIC
+ 	logging_mosq.c logging_mosq.h
+ 	memory_mosq.c memory_mosq.h
+ 	messages_mosq.c messages_mosq.h
+@@ -41,7 +41,7 @@
+ 	util_mosq.c util_mosq.h
+ 	will_mosq.c will_mosq.h)
+ 
+-set (LIBRARIES ${OPENSSL_LIBRARIES} ${PTHREAD_LIBRARIES})
++set (LIBRARIES ${OPENSSL_LIBRARIES} ${PTHREAD_LIBRARIES} PPPWWWDDD/srcs/c-ares_cygport/c-ares-1.12.0-1bl1.i686/inst/usr/lib)
+ 
+ if (UNIX AND NOT APPLE)
+ 	set (LIBRARIES ${LIBRARIES} rt)
+@@ -53,7 +53,7 @@
+ 
+ if (${WITH_SRV} STREQUAL ON)
+ 	# Simple detect c-ares
+-	find_path(ARES_HEADER ares.h)
++	find_path(ARES_HEADER ares.h PPPWWWDDD/srcs/c-ares_cygport/c-ares-1.12.0-1bl1.i686/inst/usr/include)
+ 	if (ARES_HEADER)
+ 		add_definitions("-DWITH_SRV")
+ 		set (LIBRARIES ${LIBRARIES} cares)
+--- origsrc/mosquitto-1.4.10/lib/cpp/CMakeLists.txt	2017-01-07 23:39:55.119063100 +0800
++++ origsrc/mosquitto-1.4.10/lib/cpp/CMakeLists.txt	2017-01-08 00:21:32.165938100 +0800
+@@ -1,8 +1,8 @@
+ include_directories(${mosquitto_SOURCE_DIR}/lib ${mosquitto_SOURCE_DIR}/lib/cpp
+-			${STDBOOL_H_PATH} ${STDINT_H_PATH})
+-link_directories(${mosquitto_BINARY_DIR}/lib)
++			${STDBOOL_H_PATH} ${STDINT_H_PATH} PPPWWWDDD/srcs/c-ares_cygport/c-ares-1.12.0-1bl1.i686/inst/usr/include)
++link_directories(${mosquitto_BINARY_DIR}/lib PPPWWWDDD/srcs/c-ares_cygport/c-ares-1.12.0-1bl1.i686/inst/usr/lib)
+ 
+-add_library(mosquittopp SHARED
++add_library(mosquittopp STATIC
+ 	mosquittopp.cpp mosquittopp.h)
+ 
+ target_link_libraries(mosquittopp libmosquitto)
