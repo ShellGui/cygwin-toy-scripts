@@ -123,7 +123,8 @@ libpng12
 tiff
 # XFree86-bin
 
-	
+p7zip
+
 # gobject
 # gmodule
 # glib
@@ -153,7 +154,7 @@ fi
 done
 
 # if ! which apt-cyg &>/dev/null; then
-install ./bin/apt-cyg /usr/bin
+install ${Work_Root}/bin/apt-cyg /usr/bin
 # fi
 # apt-cyg mirror http://ftp.jaist.ac.jp/pub/cygwin/
 # apt-cyg update
