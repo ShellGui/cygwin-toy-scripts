@@ -1,0 +1,51 @@
+HOMEPAGE="http://${PN}.haxx.se/"
+SRC_URI="
+	http://${PN}.haxx.se/download/${P}.tar.gz
+"
+PATCH_URI="
+	http://pkgs.fedoraproject.org/cgit/${PN}.git/plain/0001-Use-RPM-compiler-options.patch
+"
+
+CATEGORY="Libs"
+SUMMARY="C library that resolves names asynchronously"
+DESCRIPTION="c-ares is a C library that performs DNS requests and name resolves
+asynchronously."
+
+CYGCONF_ARGS="
+	--enable-maintainer-mode
+	--enable-nonblocking
+	--enable-static
+"
+
+DOCS="
+	README.cares
+	RELEASE-NOTES
+	*.pdf
+"
+DIFF_EXCLUDES="
+	ares_build.h
+	ltmain.sh
+	*.m4
+"
+
+PKG_NAMES="
+	${PN}
+	libcares2
+	libcares-devel
+"
+c_ares_CONTENTS="
+	usr/share/doc/Cygwin
+	usr/share/doc/${PN} --exclude=*.pdf
+"
+libcares2_CONTENTS="
+	usr/bin
+"
+libcares_devel_CONTENTS="
+	usr/include
+	usr/lib
+	usr/share/man
+	usr/share/doc/${PN}/*.pdf
+"
+c_ares_SUMMARY="${SUMMARY} (licensing & readmes)"
+libcares2_SUMMARY="${SUMMARY} (runtime)"
+libcares_devel_SUMMARY="${SUMMARY} (development)"
