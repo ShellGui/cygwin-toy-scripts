@@ -1,0 +1,3 @@
+https://www.softprayog.in/programming/interprocess-communication-using-fifos-in-linux
+
+https://www.softprayog.in/programming/interprocess-communication-using-pipes-in-linux
