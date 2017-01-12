@@ -6,6 +6,7 @@ all:
 	$(CC) pipe-advense.c -o pipe-advense
 	$(CC) pipe-base2.c -o pipe-base2
 	$(CC) pipe-pthread.c -o pipe-pthread
+	$(CC) pip-pthread-2r1w.c -o pip-pthread-2r1w
 
 clean:
 	rm -rf *.exe

@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <pthread.h>
 
-int fd[2];//File descriptor for creating a pipe
+int fd[2];	//用于 pipe 的文件描述符
 
-//This function continously reads fd[0] for any input data byte
-//If available, prints
+//This function 一直 reads fd[0] for any input data byte
+//If available, prints 如果读到东西就打印
 
 void *reader()
 {
@@ -27,7 +27,7 @@ void *reader()
   }
 }
 
-//This function continously writes Alphabet into fd[1]
+//This function 一直 writes 字母 into fd[1]
 
 void *writer()
 {

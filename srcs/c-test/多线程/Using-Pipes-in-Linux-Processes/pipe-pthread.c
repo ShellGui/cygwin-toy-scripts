@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <pthread.h>
 
-int fd[2];//File descriptor for creating a pipe
+int fd[2];// 用于 pipe 的文件描述符
 
-//This function continously reads fd[0] for any input data byte
+//This function 一直 reads fd[0] for any input data byte
 //If available, prints
 
 void *reader()
@@ -23,7 +23,7 @@ void *reader()
       printf ("Reader: %c\n", ch);   }
 }
 
-//This function continously writes Alphabet into fd[1]
+//This function 一直 writes Alphabet into fd[1]
 //Waits if no more space is available
 
 void *writer()
