@@ -72,6 +72,8 @@ libarchive13
 libwrap-devel
 # tcp_wrappers
 
+libev-devel
+
 # autoconf (wrapper) and autoconf2.*
 # automake (wrapper) and automake1.*
 bash
